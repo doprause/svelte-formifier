@@ -5,7 +5,7 @@ ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
 # Create the dev user
-RUN groupadd --gid $USER_GID -o $USERNAME
+RUN groupadd -g $USER_GID -o $USERNAME
 RUN useradd -u $USER_UID -g $USER_GID -m -o -s /bin/bash $USERNAME
 
 # Add sudo support
@@ -28,7 +28,9 @@ RUN apt update \
 RUN apt autoremove -y \
     && apt clean -y \
     && rm -rf /var/lib/apt/lists/*
-    
+
+# RUN mkdir /workspace && chown -R 1000:1000 /workspace
+
 # Set the default user
 USER $USERNAME
     

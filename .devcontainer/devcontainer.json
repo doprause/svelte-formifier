@@ -4,26 +4,13 @@
     "dockerfile": "./Dockerfile",
     "context": ".."
   },
-  // "runArgs": [
-  //   "--runtime=sysbox-runc"
-  // ],
-  // "features": {
-  //   "ghcr.io/devcontainers/features/docker-in-docker:2": {
-  //     "version": "latest",
-  //     "moby": false
-  //   }
-  // },
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-vscode-remote.remote-containers",
-        // "ms-azuretools.vscode-docker",
         "vivaxy.vscode-conventional-commits",
         "mhutchie.git-graph",
         "svelte.svelte-vscode",
-        // "bmewburn.vscode-intelephense-client",
-        // "laravel.vscode-laravel",
-        // "bradlc.vscode-tailwindcss",
         "aaron-bond.better-comments"
       ],
       "settings": {
@@ -31,8 +18,9 @@
       }
     }
   },
-  "postCreateCommand": {
-    "npm": "npm i"
+  "postAttachCommand": {
+    // "owner": "sudo chown -R dev:dev /workspace"
+    "npm": "npm ci"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
   "workspaceFolder": "/workspace",
