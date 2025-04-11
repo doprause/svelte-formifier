@@ -60,5 +60,9 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"dependencies": {
+		"@standard-schema/spec": "^1.0.0",
+		"zod": "^3.24.2"
+	}
 }

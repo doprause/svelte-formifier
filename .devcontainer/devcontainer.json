@@ -20,7 +20,7 @@
   },
   "postAttachCommand": {
     // "owner": "sudo chown -R dev:dev /workspace"
-    "npm": "npm ci"
+    "npm": "npm i"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
   "workspaceFolder": "/workspace",
