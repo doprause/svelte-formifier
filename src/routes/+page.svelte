@@ -8,11 +8,12 @@
 				default: "Username",
 				listeners: {
 					onBlur: (input) => console.log("Input Blurred", input.value),
-					onChange: (input) => console.log("Input Changed", input.value)
+					onChange: (input) => console.log("Input Changed", input.value),
+					onInput: (input) => console.log("On Input", input.value)
 				},
 				validation: {
 					schema: z.string().max(2),
-					trigger: 'onblur'
+					trigger: 'oninput'
 				}
 			},
 			password: {}

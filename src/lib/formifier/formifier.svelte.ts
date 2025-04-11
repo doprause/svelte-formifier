@@ -1,7 +1,7 @@
 import type { ZodString } from "zod"
 
 interface ValidationOptionBase {
-	trigger?: 'onblur' | 'onchange' | 'onsubmit'
+	trigger?: 'onblur' | 'onchange' | 'oninput' | 'onsubmit'
 }
 
 interface ValidationWithSchema extends ValidationOptionBase {
@@ -21,6 +21,7 @@ interface FieldFormOption {
 	listeners?: {
 		onBlur: (field: FormField) => void
 		onChange: (field: FormField) => void
+		onInput: (field: FormField) => void
 	}
 	validation?: ValidationFormOption
 }
@@ -92,6 +93,16 @@ class Form {
 		options.listeners?.onChange?.(field)
 	}
 
+	handleInputEvent(event: Event, field: FormField) {
+		const options = this.options.fields[field.name]
+		
+		if (options.validation?.trigger == 'oninput') {
+			this.validate(field)
+		}
+
+		options.listeners?.onChange?.(field)
+	}
+
 	validate(field: FormField): string | null {
 		if(this.options.fields[field.name]?.validation) {
 			const schema = this.options.fields[field.name]?.validation?.schema
@@ -142,6 +153,10 @@ export function formify(node: HTMLFormElement, form: Form) {
 			input.addEventListener("change", function(event) {
 				form.handleChangeEvent(event, form.fields[input.name])
 			})
+
+			input.addEventListener("input", function(event) {
+				form.handleInputEvent(event, form.fields[input.name])
+			})
 		}
 	})
 	
@@ -155,6 +170,10 @@ export function formify(node: HTMLFormElement, form: Form) {
 		
 					input.removeEventListener("change", function(event) {
 						form.handleChangeEvent(event, form.fields[input.name])
+					})
+
+					input.removeEventListener("input", function(event) {
+						form.handleInputEvent(event, form.fields[input.name])
 					})
 				}
 			})
