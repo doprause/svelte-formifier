@@ -48,6 +48,16 @@ interface FormField {
 class Form {
 	readonly options: FormOptions
 	readonly fields = $state<FormFields>({})
+	readonly errors = $derived.by<string[]>(() => {
+		let errors: string[] = []
+		Object.keys(this.fields).forEach((key) => {
+			if (this.fields[key].error) {
+				errors.push(this.fields[key].error)
+			}
+		})
+		return errors
+	})
+	readonly hasErrors = $derived(this.errors.length > 0)
 
 	constructor(options: FormOptions) {
 		this.options = options

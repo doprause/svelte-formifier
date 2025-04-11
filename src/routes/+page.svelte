@@ -22,6 +22,8 @@
 	})
 
 	$inspect(form.fields)
+	$inspect('Form Errors', form.errors)
+	$inspect('Form has errors', form.hasErrors)
 
 </script>
 
@@ -35,5 +37,9 @@
 	<label for="password">Password</label>
 	<input type="text" name="password" bind:value={form.fields.password.value}>
 
-	<button>Submit</button>
+	<button disabled={form.hasErrors}>Submit</button>
+
+	{#each form.errors as error}
+		<span style="color: red">{error}</span>
+	{/each}
 </form>
