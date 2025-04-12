@@ -17,13 +17,14 @@
 				}
 			},
 			password: {}
-		},
-		onSubmit: () => console.log('Form Submitted')
+		}
+		// onReset: () => console.log('Form Reset')
+		// onSubmit: () => console.log('Form Submitted')
 	});
 
-	$inspect(form.fields);
-	$inspect('Form Errors', form.errors);
-	$inspect('Form has errors', form.hasErrors);
+	// $inspect(form.fields);
+	// $inspect('Form Errors', form.errors);
+	// $inspect('Form has errors', form.hasErrors);
 </script>
 
 <h1>Hello Svelte Formifier</h1>
@@ -37,6 +38,8 @@
 	<input type="text" name="password" bind:value={form.fields.password.value} />
 
 	<button disabled={form.hasErrors}>Submit</button>
+	<button type="reset">Reset</button>
+	<button type="button" onclick={() => form.reset()}>Test</button>
 
 	{#each form.errors as error}
 		<span style="color: red">{error}</span>

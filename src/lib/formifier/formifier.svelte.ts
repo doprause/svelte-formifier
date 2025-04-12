@@ -32,6 +32,7 @@ interface FieldsFormOption {
 
 export interface FormOptions {
 	fields: FieldsFormOption
+	onReset?: (event: EventTarget | null) => void
 	onSubmit: (event: EventTarget | null) => void
 }
 
@@ -75,7 +76,6 @@ class Form {
 	}
 
 	createFormField(name: string, option: FieldFormOption): FormField {
-		console.log("FieldFormOption", option)
 		return {
 			error: null,
 			name: name,
@@ -113,17 +113,23 @@ class Form {
 		options.listeners?.onChange?.(field)
 	}
 
+	reset(): void {
+		Object.keys(this.fields).forEach((key) => {
+			if (this.options.fields[key]) {
+				this.fields[key] = this.createFormField(key as string, this.options.fields[key])
+			}
+		})
+	}
+
 	validate(field: FormField): string | null {
 		if (this.options.fields[field.name]?.validation) {
 			const schema = this.options.fields[field.name]?.validation?.schema
 			if (schema) {
-				console.log("Validate with Schema")
 				const result = schema.safeParse(field.value)
 				field.error = result.success ? null : "Schema validation error"
 				return field.error
 			}
 			else {
-				console.log("Validate with Validator")
 				field.error = "Validator validation error"
 				return "Validator validation error"
 			}
@@ -138,16 +144,26 @@ export function createForm(options: FormOptions): Form {
 }
 
 export function formify(node: HTMLFormElement, form: Form) {
-
-	// Get fields & buttons
 	const inputs = node.querySelectorAll('input')
 
-	// console.log(inputs)
+	function handleResetEvent(event: Event, callback: FormOptions['onReset']) {
+		if (callback) {
+			callback(event.target)
+		}
+		else {
+			event.preventDefault()
+			form.reset()
+		}
+	}
 
 	function handleSubmitEvent(event: Event, callback: FormOptions['onSubmit']) {
 		event.preventDefault()
 		callback(event.target)
 	}
+
+	node.addEventListener("reset", function (event) {
+		handleResetEvent(event, form.options.onReset)
+	})
 
 	node.addEventListener("submit", function (event) {
 		handleSubmitEvent(event, form.options.onSubmit)
@@ -172,6 +188,14 @@ export function formify(node: HTMLFormElement, form: Form) {
 
 	return {
 		destroy() {
+			node.removeEventListener("reset", function (event) {
+				handleResetEvent(event, form.options.onReset)
+			})
+
+			node.removeEventListener("submit", function (event) {
+				handleSubmitEvent(event, form.options.onSubmit)
+			})
+
 			inputs.forEach((input) => {
 				if (form.fields.hasOwnProperty(input.name)) {
 					input.removeEventListener("blur", function (event) {
