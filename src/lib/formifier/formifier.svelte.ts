@@ -147,11 +147,11 @@ export function formify(node: HTMLFormElement, form: Form) {
 	const inputs = node.querySelectorAll('input')
 
 	function handleResetEvent(event: Event, callback: FormOptions['onReset']) {
+		event.preventDefault()
 		if (callback) {
 			callback(event.target)
 		}
 		else {
-			event.preventDefault()
 			form.reset()
 		}
 	}
