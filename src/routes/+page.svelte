@@ -17,14 +17,10 @@
 				}
 			},
 			password: {}
-		}
-		// onReset: () => console.log('Form Reset')
-		// onSubmit: () => console.log('Form Submitted')
+		},
+		onReset: () => console.log('Form Reset'),
+		onSubmit: () => console.log('Form Submitted')
 	});
-
-	// $inspect(form.fields);
-	// $inspect('Form Errors', form.errors);
-	// $inspect('Form has errors', form.hasErrors);
 </script>
 
 <h1>Hello Svelte Formifier</h1>
