@@ -33,7 +33,7 @@ interface FieldsFormOption {
 export interface FormOptions {
 	fields: FieldsFormOption
 	onReset?: (event: EventTarget | null) => void
-	onSubmit: (event: EventTarget | null) => void
+	onSubmit?: (event: EventTarget | null) => void
 }
 
 interface FormFields {
@@ -158,7 +158,9 @@ export function formify(node: HTMLFormElement, form: Form) {
 
 	function handleSubmitEvent(event: Event, callback: FormOptions['onSubmit']) {
 		event.preventDefault()
-		callback(event.target)
+		if (callback) {
+			callback(event.target)
+		}
 	}
 
 	node.addEventListener("reset", function (event) {
