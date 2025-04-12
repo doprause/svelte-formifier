@@ -40,7 +40,7 @@ interface FormFields {
 }
 
 interface FormField {
-	name: string 
+	name: string
 	error: string | null
 	value: string | null
 }
@@ -85,17 +85,17 @@ class Form {
 
 	handleBlurEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
-		
+
 		if (options.validation?.trigger == 'onblur') {
 			this.validate(field)
 		}
-		
+
 		options.listeners?.onBlur?.(field)
 	}
 
 	handleChangeEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
-		
+
 		if (!options.validation?.trigger || options.validation?.trigger == 'onchange') {
 			this.validate(field)
 		}
@@ -105,7 +105,7 @@ class Form {
 
 	handleInputEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
-		
+
 		if (options.validation?.trigger == 'oninput') {
 			this.validate(field)
 		}
@@ -114,9 +114,9 @@ class Form {
 	}
 
 	validate(field: FormField): string | null {
-		if(this.options.fields[field.name]?.validation) {
+		if (this.options.fields[field.name]?.validation) {
 			const schema = this.options.fields[field.name]?.validation?.schema
-			if(schema) {
+			if (schema) {
 				console.log("Validate with Schema")
 				const result = schema.safeParse(field.value)
 				field.error = result.success ? null : "Schema validation error"
@@ -149,40 +149,40 @@ export function formify(node: HTMLFormElement, form: Form) {
 		callback(event.target)
 	}
 
-	node.addEventListener("submit", function(event) {
+	node.addEventListener("submit", function (event) {
 		handleSubmitEvent(event, form.options.onSubmit)
 	})
 
 	// Attach formify to inputs
 	inputs.forEach((input) => {
 		if (form.fields.hasOwnProperty(input.name)) {
-			input.addEventListener("blur", function(event) {
+			input.addEventListener("blur", function (event) {
 				form.handleBlurEvent(event, form.fields[input.name])
 			})
 
-			input.addEventListener("change", function(event) {
+			input.addEventListener("change", function (event) {
 				form.handleChangeEvent(event, form.fields[input.name])
 			})
 
-			input.addEventListener("input", function(event) {
+			input.addEventListener("input", function (event) {
 				form.handleInputEvent(event, form.fields[input.name])
 			})
 		}
 	})
-	
+
 	return {
 		destroy() {
 			inputs.forEach((input) => {
 				if (form.fields.hasOwnProperty(input.name)) {
-					input.removeEventListener("blur", function(event) {
+					input.removeEventListener("blur", function (event) {
 						form.handleBlurEvent(event, form.fields[input.name])
 					})
-		
-					input.removeEventListener("change", function(event) {
+
+					input.removeEventListener("change", function (event) {
 						form.handleChangeEvent(event, form.fields[input.name])
 					})
 
-					input.removeEventListener("input", function(event) {
+					input.removeEventListener("input", function (event) {
 						form.handleInputEvent(event, form.fields[input.name])
 					})
 				}
