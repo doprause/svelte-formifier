@@ -25,16 +25,12 @@ Here's simple general example to see Svelte Formifier in action:
 		fields: {
 			username: {
 				default: 'Username',
-                validator: (field) => field.value.length > 3 ? null : { 
-                    message: 'Username must be at least 3 characters long' }
-                },
+                validator: (field) => field.value.length > 3 ? null : { message: 'Error' }},
 			password: {}
 		},
 		onSubmit: (event, form) => console.log('Form Submitted')
 	});
 </script>
-
-<h1>Hello Svelte Formifier</h1>
 
 <form use:formify={form}>
 	<label for="username">Username</label>
