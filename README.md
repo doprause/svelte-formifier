@@ -11,7 +11,7 @@ With Svelte Formifier, developers can tackle the following form-related challeng
 - Complex validation and error handling
 - Conditional visibility
 
-## Show me an example
+## General Example
 
 Here's simple general example to see Svelte Formifier in action:
 
