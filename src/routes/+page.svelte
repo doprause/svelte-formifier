@@ -18,11 +18,8 @@
 			},
 			password: {}
 		},
-		onReset: (event, form) => {
-			console.log('Form Reset');
-			form.reset();
-		},
-		onSubmit: () => console.log('Form Submitted')
+		onReset: (event, form) => console.log('Form Reset', event, form),
+		onSubmit: (event, form) => console.log('Form Submitted', event, form)
 	});
 
 	$inspect(form.fields);
@@ -30,6 +27,7 @@
 
 <h1>Hello Svelte Formifier</h1>
 
+<!-- Attach Svelte Formify to the form element with use:formify={form} -->
 <form use:formify={form}>
 	<label for="username">Username</label>
 	<input type="text" name="username" bind:value={form.fields.username.value} />
@@ -46,6 +44,7 @@
 	<button type="reset">Reset</button>
 	<button type="button" onclick={() => form.reset()}>Test</button>
 
+	<!-- List all errors -->
 	{#each form.errors as error}
 		<span style="color: red">{error}</span>
 	{/each}
