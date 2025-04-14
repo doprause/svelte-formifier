@@ -18,9 +18,14 @@
 			},
 			password: {}
 		},
-		onReset: () => console.log('Form Reset'),
+		onReset: (event, form) => {
+			console.log('Form Reset');
+			form.reset();
+		},
 		onSubmit: () => console.log('Form Submitted')
 	});
+
+	$inspect(form.fields);
 </script>
 
 <h1>Hello Svelte Formifier</h1>
@@ -28,6 +33,10 @@
 <form use:formify={form}>
 	<label for="username">Username</label>
 	<input type="text" name="username" bind:value={form.fields.username.value} />
+	<p>
+		Changed: {form.fields.username.isChanged}, Dirty: {form.fields.username.isDirty}, Touched: {form
+			.fields.username.isTouched}
+	</p>
 	<p style="color: #f00">{form.fields.username.error}</p>
 
 	<label for="password">Password</label>

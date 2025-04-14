@@ -32,8 +32,8 @@ interface FieldsFormOption {
 
 export interface FormOptions {
 	fields: FieldsFormOption
-	onReset?: (event: EventTarget | null) => void
-	onSubmit?: (event: EventTarget | null) => void
+	onReset?: (event: EventTarget | null, form: Form) => void
+	onSubmit?: (event: EventTarget | null, form: Form) => void
 }
 
 interface FormFields {
@@ -41,6 +41,9 @@ interface FormFields {
 }
 
 interface FormField {
+	isChanged: boolean
+	isDirty: boolean
+	isTouched: boolean
 	name: string
 	error: string | null
 	value: string | null
@@ -77,6 +80,9 @@ class Form {
 
 	createFormField(name: string, option: FieldFormOption): FormField {
 		return {
+			isChanged: false,
+			isDirty: false,
+			isTouched: false,
 			error: null,
 			name: name,
 			value: option.default ?? null
@@ -103,8 +109,15 @@ class Form {
 		options.listeners?.onChange?.(field)
 	}
 
+	handleFocusEvent(event: Event, field: FormField) {
+		field.isTouched = true
+	}
+
 	handleInputEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
+
+		field.isDirty = true
+		field.isChanged = field.value !== options.default
 
 		if (options.validation?.trigger == 'oninput') {
 			this.validate(field)
@@ -149,7 +162,7 @@ export function formify(node: HTMLFormElement, form: Form) {
 	function handleResetEvent(event: Event, callback: FormOptions['onReset']) {
 		event.preventDefault()
 		if (callback) {
-			callback(event.target)
+			callback(event.target, form)
 		}
 		else {
 			form.reset()
@@ -159,7 +172,7 @@ export function formify(node: HTMLFormElement, form: Form) {
 	function handleSubmitEvent(event: Event, callback: FormOptions['onSubmit']) {
 		event.preventDefault()
 		if (callback) {
-			callback(event.target)
+			callback(event.target, form)
 		}
 	}
 
@@ -180,6 +193,10 @@ export function formify(node: HTMLFormElement, form: Form) {
 
 			input.addEventListener("change", function (event) {
 				form.handleChangeEvent(event, form.fields[input.name])
+			})
+
+			input.addEventListener("focus", function (event) {
+				form.handleFocusEvent(event, form.fields[input.name])
 			})
 
 			input.addEventListener("input", function (event) {
@@ -206,6 +223,10 @@ export function formify(node: HTMLFormElement, form: Form) {
 
 					input.removeEventListener("change", function (event) {
 						form.handleChangeEvent(event, form.fields[input.name])
+					})
+
+					input.removeEventListener("focus", function (event) {
+						form.handleFocusEvent(event, form.fields[input.name])
 					})
 
 					input.removeEventListener("input", function (event) {
