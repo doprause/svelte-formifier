@@ -6,14 +6,14 @@ Svelte Formifier provides headless and type-safe form state management for Svelt
 
 Currently there is no solution for Svelte 5 apps to handle forms straight forward on the client-side. This project is our take to provide such a solution.
 
-With Svelte Formifier, developers can tackle the following form-related challanges:
+With Svelte Formifier, developers can tackle the following form-related challenges:
 - Reactive data binding 
 - Complex validation and error handling
 - Conditional visibility
 
 ## Show me an example
 
-Here's general example to see velte Formifier in action:
+Here's simple general example to see Svelte Formifier in action:
 
 ```ts
 <script lang="ts">
@@ -24,14 +24,8 @@ Here's general example to see velte Formifier in action:
 		fields: {
 			username: {
 				default: 'Username',
-				listeners: {
-					onBlur: (input) => console.log('Input Blurred', input.value),
-					onChange: (input) => console.log('Input Changed', input.value),
-					onInput: (input) => console.log('On Input', input.value)
-				},
 				validation: {
-					validator: z.string().max(2),
-					triggers: ['onchange','onmount']
+					validator: z.string().max(2)
 				}
 			},
 			password: {}
@@ -97,7 +91,8 @@ Validation can take place based on certain HTML input events called ``Validation
 - `onChange`, 
 - `onFocus`,
 - `onInput`,
-- `onMount`
+- `onMount`,
+- `onSubmit`
 
 input events.
 
@@ -111,7 +106,7 @@ Validation triggers allow to **customize the timing** of the validation.
 
 #### Schema Based Validation
 
-The most basic and most of the times sufficient way to define schema based validation is by adding a `validation` object with the `validation.validator` property set to a validation schema and the `validation.triggers` property set to the triggers for when the validation should run. 
+The most basic and most of the times sufficient way to define schema based validation is by adding a `validation` object with the `validation.validator` property set to a validation schema. This triggers the validation right before submitting the form.
 
 ```diff
 let form = createForm({
@@ -119,14 +114,27 @@ let form = createForm({
         fieldname: {
 +           validation: {
 +               validator: z.string().min(3).max(32),
-+               triggers: ['onchange','onmount']
 +           }
+        },
+    },
+});
+
+Add a little bit more customization by setting the `validation.triggers` property, which defines when the validation should run other than right before submission.
+
+```diff
+let form = createForm({
+    fields: {
+        fieldname: {
+            validation: {
+                validator: z.string().min(3).max(32),
++               triggers: ['onchange','onmount']
+            }
         },
     },
 });
 ```
 
-For advanced use cases, e.g. when different validation schemas shall be used for different triggers, the schemas can be assigned to the respective trigger properties like so:
+For advanced use cases, e.g. when different validation schemas shall be used for different triggers, the schemas can be assigned to the respective trigger properties for full customization of the validation flow.
 
 ```diff
 let form = createForm({
@@ -161,3 +169,5 @@ let form = createForm({
 ### Submission Handling
 
 ### Reset Handling
+
+### Conditional Visibility
