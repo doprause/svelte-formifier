@@ -1,28 +1,40 @@
-import type { ZodString } from "zod"
+import { parse } from "svelte/compiler"
+import type { ZodSchema, ZodString } from "zod"
 
-interface ValidationOptionBase {
-	trigger?: 'onblur' | 'onchange' | 'oninput' | 'onsubmit'
+// export type SafeParseSuccess<Output> = {
+// 	success: true;
+// 	data: Output;
+// 	error?: never;
+// };
+// export type SafeParseError<Input> = {
+// 	success: false;
+// 	error: ZodError<Input>;
+// 	data?: never;
+// };
+
+type ListenerFunction = (field: FormField) => void
+
+interface ValidationErrorObject {
+	message: string
 }
-
-interface ValidationWithSchema extends ValidationOptionBase {
-	schema: ZodString
-	validator: never
+type ValidationResult = ValidationErrorObject[] | null
+type ValidationTriggers = 'onblur' | 'onchange' | 'onfocus' | 'oninput' | 'onmount'
+type ValidatorFunction = (field: FormField) => ValidationResult
+type ValidatorFormOption = ValidatorFunction | ZodString
+type ValidationFormOption = {
+	triggers?: ValidationTriggers[]
+	validator: ValidatorFormOption
 }
-
-interface ValidationWithValidator extends ValidationOptionBase {
-	schema: never
-	validator: (field: FormField) => string
-}
-
-type ValidationFormOption = ValidationWithSchema | ValidationWithValidator
 
 interface FieldFormOption {
 	default?: string
 	listeners?: {
-		onBlur: (field: FormField) => void
-		onChange: (field: FormField) => void
-		onInput: (field: FormField) => void
+		onBlur?: ListenerFunction
+		onChange?: ListenerFunction
+		onFocus?: ListenerFunction
+		onInput?: ListenerFunction
 	}
+	validator?: ValidatorFormOption
 	validation?: ValidationFormOption
 }
 
@@ -46,17 +58,20 @@ interface FormField {
 	isTouched: boolean
 	name: string
 	error: string | null
+	errors: ValidationErrorObject[] | null
 	value: string | null
 }
 
 class Form {
 	readonly options: FormOptions
 	readonly fields = $state<FormFields>({})
-	readonly errors = $derived.by<string[]>(() => {
-		let errors: string[] = []
+	readonly errors: ValidationErrorObject[] = $derived.by<ValidationErrorObject[]>(() => {
+		let errors: ValidationErrorObject[] = []
 		Object.keys(this.fields).forEach((key) => {
-			if (this.fields[key].error) {
-				errors.push(this.fields[key].error)
+			if (this.fields[key].errors) {
+				this.fields[key].errors.forEach((error) => {
+					errors.push(error)
+				})
 			}
 		})
 		return errors
@@ -84,6 +99,7 @@ class Form {
 			isDirty: false,
 			isTouched: false,
 			error: null,
+			errors: null,
 			name: name,
 			value: option.default ?? null
 		}
@@ -92,7 +108,7 @@ class Form {
 	handleBlurEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
 
-		if (options.validation?.trigger == 'onblur') {
+		if (options.validation?.triggers?.includes('onblur')) {
 			this.validate(field)
 		}
 
@@ -102,7 +118,7 @@ class Form {
 	handleChangeEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
 
-		if (!options.validation?.trigger || options.validation?.trigger == 'onchange') {
+		if (options.validation?.triggers?.includes('onchange')) {
 			this.validate(field)
 		}
 
@@ -110,7 +126,15 @@ class Form {
 	}
 
 	handleFocusEvent(event: Event, field: FormField) {
+		const options = this.options.fields[field.name]
+
 		field.isTouched = true
+
+		if (options.validation?.triggers?.includes('onfocus')) {
+			this.validate(field)
+		}
+
+		options.listeners?.onFocus?.(field)
 	}
 
 	handleInputEvent(event: Event, field: FormField) {
@@ -119,11 +143,11 @@ class Form {
 		field.isDirty = true
 		field.isChanged = field.value !== options.default
 
-		if (options.validation?.trigger == 'oninput') {
+		if (options.validation?.triggers?.includes('oninput')) {
 			this.validate(field)
 		}
 
-		options.listeners?.onChange?.(field)
+		options.listeners?.onInput?.(field)
 	}
 
 	reset(): void {
@@ -134,21 +158,50 @@ class Form {
 		})
 	}
 
-	validate(field: FormField): string | null {
+	validate(field: FormField): ValidationResult {
+		console.log(`Validating field: ${field.name} `)
+
+		let result: ValidationResult = null
+		let validator = null
+
+		// Get validator
 		if (this.options.fields[field.name]?.validation) {
-			const schema = this.options.fields[field.name]?.validation?.schema
-			if (schema) {
-				const result = schema.safeParse(field.value)
-				field.error = result.success ? null : "Schema validation error"
-				return field.error
-			}
-			else {
-				field.error = "Validator validation error"
-				return "Validator validation error"
-			}
+			console.log("Validating with 'validation' object")
+			validator = this.options.fields[field.name]?.validation?.validator
+		}
+		else if (this.options.fields[field.name]?.validator) {
+			console.log("Validating with 'validator' prop")
+			validator = this.options.fields[field.name]?.validator
 		}
 
-		return null
+		// Validate
+		if (validator && typeof validator === 'function') {
+			result = validator(field)
+		}
+		else if (validator) {
+			const schema = validator as ZodSchema
+			const parseResult = schema.safeParse(field.value)
+			result = parseResult.success ? null : parseResult.error.errors.map((error) => {
+				return {
+					message: error.message
+			}})
+		}
+
+		// Set errors
+		field.error = result ? result.join(' | ') : null
+		field.errors = result
+	
+		return result
+	}
+
+	validateForm() {
+		console.log("Validating form")
+
+		Object.keys(this.fields).forEach((key) => {
+			if (this.options.fields[key]) {
+				this.validate(this.fields[key])
+			}
+		})
 	}
 }
 
@@ -172,6 +225,8 @@ export function formify(node: HTMLFormElement, form: Form) {
 
 	function handleSubmitEvent(event: Event, callback: FormOptions['onSubmit']) {
 		event.preventDefault()
+		form.validateForm()
+
 		if (callback) {
 			callback(event, form)
 		}

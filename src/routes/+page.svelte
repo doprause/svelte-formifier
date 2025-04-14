@@ -11,9 +11,13 @@
 					onChange: (input) => console.log('Input Changed', input.value),
 					onInput: (input) => console.log('On Input', input.value)
 				},
+				validator: z.string().max(12)
+			},
+			email: {
+				default: 'user@example.com',
 				validation: {
-					schema: z.string().max(2),
-					trigger: 'oninput'
+					validator: z.string().max(12),
+					triggers: ['onchange', 'onmount']
 				}
 			},
 			password: {}
@@ -46,6 +50,6 @@
 
 	<!-- List all errors -->
 	{#each form.errors as error}
-		<span style="color: red">{error}</span>
+		<span style="color: red">{error.message}</span>
 	{/each}
 </form>
