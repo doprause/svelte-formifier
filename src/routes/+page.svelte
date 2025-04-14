@@ -27,6 +27,16 @@
 					triggers: ['onchange', 'oninput', 'onmount']
 				}
 			},
+			hobby: {
+				validation: {
+					onBlur: (field) => {return [{ name: field.name, message: "onblur"}]},
+					onChange: (field) => {return [{ name: field.name, message: "onchange"}]},
+					onFocus: (field) => {return [{ name: field.name, message: "onfocus"}]},
+					onInput: (field) => {return [{ name: field.name, message: "oninput"}]},
+					onMount: (field) => {return [{ name: field.name, message: "onmount"}]},
+					onSubmit: (field) => {return [{ name: field.name, message: "onsubmit"}]} 
+				}
+			},
 			password: {}
 		},
 		onReset: (event, form) => console.log('Form Reset', event, form),
@@ -65,6 +75,12 @@
 		<label for="street">Street</label>
 		<input type="text" name="street" bind:value={form.fields.street.value} />
 		<p style="color: #f00">{form.fields.street.error}</p>
+	</div>
+
+	<div>
+		<label for="hobby">Hobby</label>
+		<input type="text" name="hobby" bind:value={form.fields.hobby.value} />
+		<p style="color: #f00">{form.fields.hobby.error}</p>
 	</div>
 
 	<div>

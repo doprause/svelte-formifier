@@ -24,7 +24,13 @@ type ValidatorFunction = (field: FormField) => ValidationResult
 type ValidatorFormOption = ValidatorFunction | ZodString
 type ValidationFormOption = {
 	triggers?: ValidationTriggers[]
-	validator: ValidatorFormOption
+	validator?: ValidatorFormOption
+	onBlur?: ValidatorFormOption
+	onChange?: ValidatorFormOption
+	onFocus?: ValidatorFormOption
+	onInput?: ValidatorFormOption
+	onMount?: ValidatorFormOption
+	onSubmit?: ValidatorFormOption
 }
 
 interface FieldFormOption {
@@ -90,7 +96,10 @@ class Form {
 		Object.keys(options.fields).forEach((key: keyof typeof options.fields) => {
 			fields[key] = this.createFormField(key as string, options.fields[key])
 
-			if (options.fields[key].validation?.triggers?.includes('onmount')) {
+			if (options.fields[key].validation?.onMount) {
+				this.validate(fields[key], options.fields[key].validation?.onMount)
+			}
+			else if (options.fields[key].validation?.triggers?.includes('onmount') ) {
 				this.validate(fields[key])
 			}
 		})
@@ -112,8 +121,12 @@ class Form {
 
 	handleBlurEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
+		const validator = this.options.fields[field.name].validation?.onBlur
 
-		if (options.validation?.triggers?.includes('onblur')) {
+		if (validator) {
+			this.validate(field, validator)
+		}
+		else if (options.validation?.triggers?.includes('onblur')) {
 			this.validate(field)
 		}
 
@@ -122,8 +135,12 @@ class Form {
 
 	handleChangeEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
+		const validator = this.options.fields[field.name].validation?.onChange
 
-		if (options.validation?.triggers?.includes('onchange')) {
+		if (validator) {
+			this.validate(field, validator)
+		}
+		else if (options.validation?.triggers?.includes('onchange')) {
 			this.validate(field)
 		}
 
@@ -132,10 +149,14 @@ class Form {
 
 	handleFocusEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
+		const validator = this.options.fields[field.name].validation?.onFocus
 
 		field.isTouched = true
 
-		if (options.validation?.triggers?.includes('onfocus')) {
+		if (validator) {
+			this.validate(field, validator)
+		}
+		else if (options.validation?.triggers?.includes('onfocus')) {
 			this.validate(field)
 		}
 
@@ -144,10 +165,14 @@ class Form {
 
 	handleInputEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
+		const validator = this.options.fields[field.name].validation?.onInput
 
 		field.isDirty = true
 		field.isChanged = field.value !== options.default
 
+		if (validator) {
+			this.validate(field, validator)
+		}
 		if (options.validation?.triggers?.includes('oninput')) {
 			this.validate(field)
 		}
@@ -163,24 +188,27 @@ class Form {
 		})
 	}
 
-	validate(field: FormField): ValidationResult {
+	validate(field: FormField, validator?: ValidatorFormOption): ValidationResult {
 		let result: ValidationResult = null
-		let validator = null
+		let theValidator = null
 
 		// Get validator
-		if (this.options.fields[field.name]?.validation) {
-			validator = this.options.fields[field.name]?.validation?.validator
+		if (validator) {
+			theValidator = validator
+		}
+		else if (this.options.fields[field.name]?.validation) {
+			theValidator = this.options.fields[field.name]?.validation?.validator
 		}
 		else if (this.options.fields[field.name]?.validator) {
-			validator = this.options.fields[field.name]?.validator
+			theValidator = this.options.fields[field.name]?.validator
 		}
 
 		// Validate
-		if (validator && typeof validator === 'function') {
-			result = validator(field)
+		if (theValidator && typeof theValidator === 'function') {
+			result = theValidator(field)
 		}
-		else if (validator) {
-			const schema = validator as ZodSchema
+		else if (theValidator) {
+			const schema = theValidator as ZodSchema
 			const parseResult = schema.safeParse(field.value)
 			result = parseResult.success ? null : parseResult.error.errors.map((error) => {
 				return {
@@ -203,7 +231,13 @@ class Form {
 
 		Object.keys(this.fields).forEach((key) => {
 			if (this.options.fields[key]) {
-				this.validate(this.fields[key])
+				const validator = this.options.fields[key].validation?.onSubmit
+				if (validator) {
+					this.validate(this.fields[key], validator)
+				}
+				else {
+					this.validate(this.fields[key])
+				}
 			}
 		})
 	}
