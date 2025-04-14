@@ -15,6 +15,7 @@ import type { ZodSchema, ZodString } from "zod"
 type ListenerFunction = (field: FormField) => void
 
 interface ValidationErrorObject {
+	name: string
 	message: string
 }
 type ValidationResult = ValidationErrorObject[] | null
@@ -84,10 +85,14 @@ class Form {
 	}
 
 	createFormFields(options: FormOptions): FormFields {
-		let fields = {}
+		let fields: FormFields = {}
 
 		Object.keys(options.fields).forEach((key: keyof typeof options.fields) => {
 			fields[key] = this.createFormField(key as string, options.fields[key])
+
+			if (options.fields[key].validation?.triggers?.includes('onmount')) {
+				this.validate(fields[key])
+			}
 		})
 
 		return fields
@@ -159,18 +164,14 @@ class Form {
 	}
 
 	validate(field: FormField): ValidationResult {
-		console.log(`Validating field: ${field.name} `)
-
 		let result: ValidationResult = null
 		let validator = null
 
 		// Get validator
 		if (this.options.fields[field.name]?.validation) {
-			console.log("Validating with 'validation' object")
 			validator = this.options.fields[field.name]?.validation?.validator
 		}
 		else if (this.options.fields[field.name]?.validator) {
-			console.log("Validating with 'validator' prop")
 			validator = this.options.fields[field.name]?.validator
 		}
 
@@ -183,13 +184,16 @@ class Form {
 			const parseResult = schema.safeParse(field.value)
 			result = parseResult.success ? null : parseResult.error.errors.map((error) => {
 				return {
+					name: field.name,
 					message: error.message
 			}})
 		}
 
 		// Set errors
-		field.error = result ? result.join(' | ') : null
+		field.error = result ? result.map((error) => error.message).join('|') : null
 		field.errors = result
+
+		console.log(`Validating field: ${field.name} > ${field.error}`)
 	
 		return result
 	}

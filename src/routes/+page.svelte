@@ -20,6 +20,13 @@
 					triggers: ['onchange', 'onmount']
 				}
 			},
+			street: {
+				default: 'Main Street',
+				validation: {
+					validator: (field) => {return !field.value || field.value.length < 12 ? null : [{ name: field.name, message: "String must be < 12 chars"}]},
+					triggers: ['onchange', 'oninput', 'onmount']
+				}
+			},
 			password: {}
 		},
 		onReset: (event, form) => console.log('Form Reset', event, form),
@@ -29,27 +36,55 @@
 	$inspect(form.fields);
 </script>
 
-<h1>Hello Svelte Formifier</h1>
+<h1>Svelte Formifier Example</h1>
 
 <!-- Attach Svelte Formify to the form element with use:formify={form} -->
 <form use:formify={form}>
-	<label for="username">Username</label>
-	<input type="text" name="username" bind:value={form.fields.username.value} />
-	<p>
-		Changed: {form.fields.username.isChanged}, Dirty: {form.fields.username.isDirty}, Touched: {form
-			.fields.username.isTouched}
-	</p>
-	<p style="color: #f00">{form.fields.username.error}</p>
+	<div>
+		<label for="username">Username</label>
+		<input type="text" name="username" bind:value={form.fields.username.value} />
+		{#if form.fields.username.isTouched}
+			✋(T)
+		{/if}
+		{#if form.fields.username.isDirty}
+			💩(D)
+		{/if}
+		{#if form.fields.username.isChanged}
+			✨(C)
+		{/if}
+		<p style="color: #f00">{form.fields.username.error}</p>
+	</div>
 
-	<label for="password">Password</label>
-	<input type="text" name="password" bind:value={form.fields.password.value} />
+	<div>
+		<label for="email">Email</label>
+		<input type="text" name="email" bind:value={form.fields.email.value} />
+		<p style="color: #f00">{form.fields.email.error}</p>
+	</div>
 
-	<button disabled={form.hasErrors}>Submit</button>
-	<button type="reset">Reset</button>
-	<button type="button" onclick={() => form.reset()}>Test</button>
+	<div>
+		<label for="street">Street</label>
+		<input type="text" name="street" bind:value={form.fields.street.value} />
+		<p style="color: #f00">{form.fields.street.error}</p>
+	</div>
+
+	<div>
+		<label for="password">Password</label>
+		<input type="text" name="password" bind:value={form.fields.password.value} />
+		<p style="color: #f00">{form.fields.password.error}</p>
+	</div>
+
+	<div>
+		<!-- <button disabled={form.hasErrors}>Submit</button> -->
+		<button>Submit</button>
+		<button type="reset">Reset</button>
+		<button type="button" onclick={() => form.reset()}>Test</button>
+	</div>
 
 	<!-- List all errors -->
 	{#each form.errors as error}
-		<span style="color: red">{error.message}</span>
+		<div style="color: red">{error.name + ': ' +error.message}</div>
+	{/each}
+	{#each form.errors.map((error) => error.name + ': ' + error.message).join(' | ') as error}
+		<span style="color: red">{error}</span>
 	{/each}
 </form>
