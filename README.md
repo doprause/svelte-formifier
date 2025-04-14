@@ -106,7 +106,19 @@ Validation triggers allow to **customize the timing** of the validation.
 
 #### Schema Based Validation
 
-The most basic and most of the times sufficient way to define schema based validation is by adding a `validation` object with the `validation.validator` property set to a validation schema. This triggers the validation right before submitting the form.
+The most basic way to define schema based validation is by setting the `field.validator` property to a validation schema. This triggers the validation right before submitting the form.
+
+```diff
+let form = createForm({
+    fields: {
+        fieldname: {
++           validator: z.string().min(3).max(32),
+        },
+    },
+});
+```
+
+Add a little more customization by specifying a `validation` object and setting the `validation.validator` property to a validation schema and the `validation.triggers` property, which defines when the validation should run other than right before the submission of the form.
 
 ```diff
 let form = createForm({
@@ -114,21 +126,8 @@ let form = createForm({
         fieldname: {
 +           validation: {
 +               validator: z.string().min(3).max(32),
-+           }
-        },
-    },
-});
-
-Add a little bit more customization by setting the `validation.triggers` property, which defines when the validation should run other than right before submission.
-
-```diff
-let form = createForm({
-    fields: {
-        fieldname: {
-            validation: {
-                validator: z.string().min(3).max(32),
 +               triggers: ['onchange','onmount']
-            }
++           }
         },
     },
 });
