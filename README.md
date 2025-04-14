@@ -18,19 +18,18 @@ Here's simple general example to see Svelte Formifier in action:
 ```ts
 <script lang="ts">
 	import { formify, createForm } from '$lib/formifier/formifier.svelte.js';
-	import { z } from 'zod';
 
+    // Create the form object that holds the reactive state and provides 
+    // an API to interact with the form state
 	let form = createForm({
 		fields: {
 			username: {
 				default: 'Username',
-				validation: {
-					validator: z.string().max(2)
-				}
-			},
+                validator: (field) => field.value.length > 3 ? null : { 
+                    message: 'Username must be at least 3 characters long' }
+                },
 			password: {}
 		},
-		onReset: (event, form) => console.log('Form Reset'),
 		onSubmit: (event, form) => console.log('Form Submitted')
 	});
 </script>
