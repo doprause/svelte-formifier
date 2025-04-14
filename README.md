@@ -1,58 +1,163 @@
-# Svelte library
+# Svelte Formifier
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+Svelte Formifier provides headless and type-safe form state management for Svelte 5. It is intended to be an ultimate solution for handling forms in Svelte 5 based single-page applications (SPAs).
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+## Motivation
 
-## Creating a project
+Currently there is no solution for Svelte 5 apps to handle forms straight forward on the client-side. This project is our take to provide such a solution.
 
-If you're seeing this, you've probably already done this step. Congrats!
+With Svelte Formifier, developers can tackle the following form-related challanges:
+- Reactive data binding 
+- Complex validation and error handling
+- Conditional visibility
 
-```bash
-# create a new project in the current directory
-npx sv create
+## Show me an example
 
-# create a new project in my-app
-npx sv create my-app
+Here's general example to see velte Formifier in action:
+
+```ts
+<script lang="ts">
+	import { formify, createForm } from '$lib/formifier/formifier.svelte.js';
+	import { z } from 'zod';
+
+	let form = createForm({
+		fields: {
+			username: {
+				default: 'Username',
+				listeners: {
+					onBlur: (input) => console.log('Input Blurred', input.value),
+					onChange: (input) => console.log('Input Changed', input.value),
+					onInput: (input) => console.log('On Input', input.value)
+				},
+				validation: {
+					validator: z.string().max(2),
+					triggers: ['onchange','onmount']
+				}
+			},
+			password: {}
+		},
+		onReset: (event, form) => console.log('Form Reset'),
+		onSubmit: (event, form) => console.log('Form Submitted')
+	});
+</script>
+
+<h1>Hello Svelte Formifier</h1>
+
+<form use:formify={form}>
+	<label for="username">Username</label>
+	<input type="text" name="username" bind:value={form.fields.username.value} />
+	<p style="color: #f00">{form.fields.username.error}</p>
+
+	<label for="password">Password</label>
+	<input type="text" name="password" bind:value={form.fields.password.value} />
+
+	<button disabled={form.hasErrors}>Submit</button>
+	<button type="reset">Reset</button>
+</form>
 ```
 
-## Developing
+## Key Concepts
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+### Form Options
 
-```bash
-npm run dev
+``Form options`` are used to setup a `Form Instance`. The form options allow to configure individual form fields as well as the entire form.
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+### Form Instance
+
+The form instance **holds the state** of the form and **provides an API** to interact with the form state. Conceptually, the form instance is comprised of one or multiple form fields, where the form fields correspond with the inputs of an HTML form.
+
+### Form Fields
+
+Form fields represent the individual inputs of an HTML form. 
+
+#### Field State
+
+Each form field has the following reactive state elements:
+
+- `value`: The current value of the form field
+- `isChanged`: Is set to `true` when the field's value uis different than the default value
+- `isDirty`: Is set to `true` when the user inputs anything into the field
+- `isTouched`: Is set to `true` when the user tabs/clicks into the field
+
+Typically, the `value` is bound to an HTML `<input>`'s value attribute:
+
+```html
+<input name="fieldname" bind:value={ form.fields.fieldname.value }/>
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+Likewise the other state variables can be used to bind with other attributes. 
 
-## Building
+### Validation
 
-To build your library:
+Validation can be ``schema based`` or ``function based``. The schema based approach uses validation schemas from libraries like [Zod](https://zod.dev/) to validate each field. The function based approach uses a callback function that gets the form field's state as an argument and returns either **null**, if the validation passes, or an **array with the error objects**, if the validation fails.
 
-```bash
-npm run package
+Validation can take place based on certain HTML input events called ``Validation Triggers``. I.e. validation can be triggered for the 
+
+- `onBlur`, 
+- `onChange`, 
+- `onFocus`,
+- `onInput`,
+- `onMount`
+
+input events.
+
+#### Validation Strategies
+
+Different validation strategies allow to customize whether to validate **individual fields**, a **subset of fields**, the **entire form** or a **combination of all thereof**.
+
+#### Validation Triggers
+
+Validation triggers allow to **customize the timing** of the validation.
+
+#### Schema Based Validation
+
+The most basic and most of the times sufficient way to define schema based validation is by adding a `validation` object with the `validation.validator` property set to a validation schema and the `validation.triggers` property set to the triggers for when the validation should run. 
+
+```diff
+let form = createForm({
+    fields: {
+        fieldname: {
++           validation: {
++               validator: z.string().min(3).max(32),
++               triggers: ['onchange','onmount']
++           }
+        },
+    },
+});
 ```
 
-To create a production version of your showcase app:
+For advanced use cases, e.g. when different validation schemas shall be used for different triggers, the schemas can be assigned to the respective trigger properties like so:
 
-```bash
-npm run build
+```diff
+let form = createForm({
+    fields: {
+        fieldname: {
++           validation: {
++               onblur: z.string().min(1),
++               onchange: z.string().min(2),
++               onfocus: z.string().min(3),
++               oninput: z.string().min(4),
++               onmount: z.string().min(5),
++           }
+        },
+    },
+});
 ```
 
-You can preview the production build with `npm run preview`.
+#### Function Based Validation
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+#### Validation Errors
 
-## Publishing
+#### Field Validation
 
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
+#### Form Validation
 
-To publish your library to [npm](https://www.npmjs.com):
+#### Async Validation
 
-```bash
-npm publish
-```
+`TBD`
+
+### Form Listeners
+
+### Submission Handling
+
+### Reset Handling
