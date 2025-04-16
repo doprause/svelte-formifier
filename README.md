@@ -113,6 +113,9 @@ let form = createForm({
 });
 ```
 
+> [!NOTE]
+> All validations are run just before submitting the form by default, so we can be sure that all validation errors are set correctly when the `form.onSubmit` callback is run.
+
 Add a little more customization by specifying a `validation` object and setting the `validation.validator` property to a validation schema and the `validation.triggers` property, which defines when the validation should run other than right before the submission of the form.
 
 ```diff
@@ -127,6 +130,9 @@ let form = createForm({
     },
 });
 ```
+
+> [!NOTE]
+> Since all validations are run just before submitting the form by default, you don't have to set the `onsubmit` trigger explicitely.
 
 For advanced use cases, e.g. when different validation schemas shall be used for different triggers, the validation schemas can be assigned to the respective trigger properties for full customization of the validation flow.
 
@@ -161,7 +167,7 @@ function validateField(field): ValidationError[] | null {
 }
 ```
 
-Function based validation works quite similar than schema based validatin. Just replace the schema with a validation function that will be run according to the specified validation triggers.
+Function based validation works quite similar than schema based validation. Just replace the schema with a validation function that will be run according to the specified validation triggers.
 
 Define the validation by setting the `field.validator` property to a validation function. This triggers the validation right before submitting the form.
 
@@ -174,6 +180,9 @@ let form = createForm({
     },
 });
 ```
+
+> [!NOTE]
+> All validations are run just before submitting the form by default, so we can be sure that all validation errors are set correctly when the `form.onSubmit` callback is run.
 
 Add a little more customization by specifying a `validation` object and setting the `validation.validator` property to a validation function and the `validation.triggers` property, which defines when the validation should run other than right before the submission of the form.
 
@@ -189,6 +198,8 @@ let form = createForm({
     },
 });
 ```
+> [!NOTE]
+> Since all validations are run just before submitting the form by default, you don't have to set the `onsubmit` trigger explicitely.
 
 For advanced use cases, e.g. when different validation schemas shall be used for different triggers, the validation functions can be assigned to the respective trigger properties for full customization of the validation flow.
 
