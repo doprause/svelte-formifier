@@ -14,11 +14,11 @@ import type { ZodSchema, ZodString } from "zod"
 
 type ListenerFunction = (field: FormField) => void
 
-interface ValidationErrorObject {
+interface ValidationError {
 	name: string
 	message: string
 }
-type ValidationResult = ValidationErrorObject[] | null
+type ValidationResult = ValidationError[] | null
 type ValidationTriggers = 'onblur' | 'onchange' | 'onfocus' | 'oninput' | 'onmount'
 type ValidatorFunction = (field: FormField) => ValidationResult
 type ValidatorFormOption = ValidatorFunction | ZodString
@@ -65,15 +65,15 @@ interface FormField {
 	isTouched: boolean
 	name: string
 	error: string | null
-	errors: ValidationErrorObject[] | null
+	errors: ValidationError[] | null
 	value: string | null
 }
 
 class Form {
 	readonly options: FormOptions
 	readonly fields = $state<FormFields>({})
-	readonly errors: ValidationErrorObject[] = $derived.by<ValidationErrorObject[]>(() => {
-		let errors: ValidationErrorObject[] = []
+	readonly errors: ValidationError[] = $derived.by<ValidationError[]>(() => {
+		let errors: ValidationError[] = []
 		Object.keys(this.fields).forEach((key) => {
 			if (this.fields[key].errors) {
 				this.fields[key].errors.forEach((error) => {
