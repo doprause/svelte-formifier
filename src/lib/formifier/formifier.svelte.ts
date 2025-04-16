@@ -282,19 +282,30 @@ export function formify(node: HTMLFormElement, form: Form) {
 			input.addEventListener("blur", function (event) {
 				form.handleBlurEvent(event, form.fields[input.name])
 			})
-
 			input.addEventListener("change", function (event) {
 				form.handleChangeEvent(event, form.fields[input.name])
 			})
-
 			input.addEventListener("focus", function (event) {
 				form.handleFocusEvent(event, form.fields[input.name])
 			})
-
 			input.addEventListener("input", function (event) {
 				form.handleInputEvent(event, form.fields[input.name])
 			})
 		}
+		else if (form.fields.hasOwnProperty(input.id)) {
+            input.addEventListener("blur", function (event) {
+                form.handleBlurEvent(event, form.fields[input.id]);
+            });
+            input.addEventListener("change", function (event) {
+                form.handleChangeEvent(event, form.fields[input.id]);
+            });
+            input.addEventListener("focus", function (event) {
+                form.handleFocusEvent(event, form.fields[input.id]);
+            });
+            input.addEventListener("input", function (event) {
+                form.handleInputEvent(event, form.fields[input.id]);
+            });
+        }
 	})
 
 	return {
@@ -312,19 +323,30 @@ export function formify(node: HTMLFormElement, form: Form) {
 					input.removeEventListener("blur", function (event) {
 						form.handleBlurEvent(event, form.fields[input.name])
 					})
-
 					input.removeEventListener("change", function (event) {
 						form.handleChangeEvent(event, form.fields[input.name])
 					})
-
 					input.removeEventListener("focus", function (event) {
 						form.handleFocusEvent(event, form.fields[input.name])
 					})
-
 					input.removeEventListener("input", function (event) {
 						form.handleInputEvent(event, form.fields[input.name])
 					})
 				}
+				else if (form.fields.hasOwnProperty(input.id)) {
+                    input.removeEventListener("blur", function (event) {
+                        form.handleBlurEvent(event, form.fields[input.id]);
+                    });
+                    input.removeEventListener("change", function (event) {
+                        form.handleChangeEvent(event, form.fields[input.id]);
+                    });
+                    input.removeEventListener("focus", function (event) {
+                        form.handleFocusEvent(event, form.fields[input.id]);
+                    });
+                    input.removeEventListener("input", function (event) {
+                        form.handleInputEvent(event, form.fields[input.id]);
+                    });
+                }
 			})
 		}
 	}
