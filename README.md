@@ -128,18 +128,23 @@ let form = createForm({
 });
 ```
 
-For advanced use cases, e.g. when different validation schemas shall be used for different triggers, the schemas can be assigned to the respective trigger properties for full customization of the validation flow.
+For advanced use cases, e.g. when different validation schemas shall be used for different triggers, the validation schemas can be assigned to the respective trigger properties for full customization of the validation flow.
 
 ```diff
++ const onBlurSchema = z.string() ...
++ const onChangeSchema = z.string() ...
+// ...
+
 let form = createForm({
     fields: {
         fieldname: {
 +           validation: {
-+               onblur: z.string().min(1),
-+               onchange: z.string().min(2),
-+               onfocus: z.string().min(3),
-+               oninput: z.string().min(4),
-+               onmount: z.string().min(5),
++               onBlur: onBlurSchema,
++               onChange: onChangeSchema,
++               onFocus: onFocusSchema,
++               onInput: onInputSchema,
++               onMount: onMountSchema,
++               onSubmit: onSubmitSchema,
 +           }
         },
     },
@@ -148,11 +153,98 @@ let form = createForm({
 
 #### Function Based Validation
 
+Function based validation works quite similar than schema based validatin. Just replace the schema with a validation function that will be run according to the specified validation triggers.
+
+Define the validation by setting the `field.validator` property to a validation function. This triggers the validation right before submitting the form.
+
+```diff
+let form = createForm({
+    fields: {
+        fieldname: {
++           validator: (field) => field.value.length < 3 || field.value.length > 32 ? null : 'Value must have min. 3 and max. 32 characters',
+        },
+    },
+});
+```
+
+Add a little more customization by specifying a `validation` object and setting the `validation.validator` property to a validation function and the `validation.triggers` property, which defines when the validation should run other than right before the submission of the form.
+
+```diff
+let form = createForm({
+    fields: {
+        fieldname: {
++           validation: {
++               validator: (field) => field.value.length < 3 || field.value.length > 32 ? null : 'Value must have min. 3 and max. 32 characters',
++               triggers: ['onchange','onmount']
++           }
+        },
+    },
+});
+```
+
+For advanced use cases, e.g. when different validation schemas shall be used for different triggers, the validation functions can be assigned to the respective trigger properties for full customization of the validation flow.
+
+```diff
++ function validateOnBlur(field) { ... }
++ function validateOnChange(field) { ... }
+// ...
+
+let form = createForm({
+    fields: {
+        fieldname: {
++           validation: {
++               onBlur: (field) => validateOnBlur(field),
++               onChange: (field) => validateOnChange(field),
++               onFocus: (field) => validateOnFocus(field),
++               onInput: (field) => validateOnInput(field),
++               onMount: (field) => validateOnMount(field),
++               onSubmit: (field) => validateOnSubmit(field),
++           }
+        },
+    },
+});
+```
+
 #### Validation Errors
+
+Validation errors are represented by `ValidationError` objects. A validation error object has a mandatory `name` and a `message` property.
+
+```ts
+interface ValidationError {
+	name: string
+	message: string
+}
+```
 
 #### Field Validation
 
+Each form field has an `errors` property which holds the current validation errors, if any. If there are no validation errors, the property is `null`.
+
+To render all errors for a given field, use a snippet like this:
+
+```js svelte
+{#each form.fields.fieldname.errors as error}
+	<div>{error.message}</div>
+{/each}
+```
+
+For convenience, there's also an `error` property, that holds a string with the concatenated error messages, if validation failed, otherwise the `error` property is `null`.
+
+```js svelte
+<span>{form.fields.fieldname.error}</span>
+```
+
 #### Form Validation
+
+There is an `errors` property which holds the current validation errors for the entire form, if any. If there are no validation errors, the property is `null`.
+
+To render the errors for the entire form, just use a snippet like this:
+
+```js svelte
+{#each form.errors as error}
+	<div>{error.name + ': ' + error.message}</div>
+{/each}
+```
 
 #### Async Validation
 
