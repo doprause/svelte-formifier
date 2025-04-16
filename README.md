@@ -153,6 +153,14 @@ let form = createForm({
 
 #### Function Based Validation
 
+A validation function must return `null` if the validation passes, or an array of validation error objects (of type `ValidationError`), if validation fails.
+
+```js
+function validateField(field): ValidationError[] | null {
+	return validationPassed ? null : [{ name: field.name, message: "Validation failed"}]
+}
+```
+
 Function based validation works quite similar than schema based validatin. Just replace the schema with a validation function that will be run according to the specified validation triggers.
 
 Define the validation by setting the `field.validator` property to a validation function. This triggers the validation right before submitting the form.
