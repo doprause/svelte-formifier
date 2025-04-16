@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formify, createForm } from '$lib/formifier/formifier.svelte.js';
+	import { fade } from 'svelte/transition';
 	import { z } from 'zod';
 
 	let form = createForm({
@@ -17,14 +18,14 @@
 				default: 'user@example.com',
 				validation: {
 					validator: z.string().max(12),
-					triggers: ['onchange', 'onmount']
+					triggers: ['onchange']
 				}
 			},
 			street: {
 				default: 'Main Street',
 				validation: {
 					validator: (field) => {return !field.value || field.value.length < 12 ? null : [{ name: field.name, message: "String must be < 12 chars"}]},
-					triggers: ['onchange', 'oninput', 'onmount']
+					triggers: ['onchange', 'oninput']
 				}
 			},
 			hobby: {
@@ -37,6 +38,10 @@
 					onSubmit: (field) => {return [{ name: field.name, message: "onsubmit"}]} 
 				}
 			},
+			hobbyClub: {},
+			hobbyCity: {
+				visible: () => false
+			},
 			password: {}
 		},
 		onReset: (event, form) => console.log('Form Reset', event, form),
@@ -44,6 +49,7 @@
 	});
 
 	$inspect(form.fields);
+	$inspect(form.fields.hobbyCity.visible);
 </script>
 
 <h1>Svelte Formifier Example</h1>
@@ -70,7 +76,7 @@
 		<input type="text" name="email" bind:value={form.fields.email.value} />
 		<p style="color: #f00">{form.fields.email.error}</p>
 	</div>
-
+	
 	<div>
 		<label for="street">Street</label>
 		<input type="text" name="street" bind:value={form.fields.street.value} />
@@ -81,6 +87,17 @@
 		<label for="hobby">Hobby</label>
 		<input type="text" name="hobby" bind:value={form.fields.hobby.value} />
 		<p style="color: #f00">{form.fields.hobby.error}</p>
+	</div>
+
+	{#if form.fields.hobby.value}
+		<div transition:fade>
+			<label for="club">Hobby Club</label>
+			<input type="text" name="hobbyCity" bind:value={form.fields.hobbyCity.value} />
+		</div>
+	{/if}
+	<div>
+		<label for="club">Hobby City</label>
+		<input type="text" name="hobbyClub" bind:value={form.fields.hobbyCity.value} hidden={form.fields.hobbyCity.visible}/>
 	</div>
 
 	<div>

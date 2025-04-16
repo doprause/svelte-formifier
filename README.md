@@ -1,5 +1,8 @@
 # Svelte Formifier
 
+> [!WARNING]
+> This repo is currently heavily under development and **not even** in `alpha` state. I highly discourage using this code for any serious project right now. Also, not all feature listed in this `README` are implemented, yet.
+
 Svelte Formifier provides headless and type-safe form state management for Svelte 5. It is intended to be an ultimate solution for handling forms in Svelte 5 based single-page applications (SPAs).
 
 ## Motivation
@@ -271,8 +274,75 @@ To render the errors for the entire form, just use a snippet like this:
 
 ### Form Listeners
 
+`TBD`
+
 ### Submission Handling
+
+`TBD`
 
 ### Reset Handling
 
+`TBD`
+
+### Multiple Forms Support
+
+`TBD`
+
+## Additional Features
+
+### Saving Form State
+
+`TBD`
+
 ### Conditional Visibility
+
+Svelte-formifier by default shows all fields of a form. However, sometimes it's required to show/hide certain fields dynamically based on the value of another field or a group of fields. You can either use plain Svelte 5 means to accomplish this or use `svelte-formifier`'s reactive `visible` property of a field. 
+
+The following example shows how to show/hide additional fields based on the value of another field with plain Svelte 5 template means. If the value of the `hobby` fields is not falsy, the input for the `club` field is shown, otherwise it's hidden.
+
+```svelte
+<script lang="ts">
+	import { formify, createForm } from '$lib/formifier/formifier.svelte.js';
+    let form = createForm({
+        fields: {
+            club: {}
+            hobby: {}
+        }
+    })
+</script>
+
+<form use:formify={form}>
+    <input type="text" name="hobby" bind:value={form.fields.hobby.value} />
+
+    {#if form.fields.hobby.value}
+        <input type="text" name="hobbyClub" bind:value={form.fields.hobbyClub.value} />
+        <input type="text" name="hobbyCity" bind:value={form.fields.hobbyCity.value} />
+    {/if}
+</form>
+```
+
+For more complex logic, `svelte-formifier` provides 
+
+```svelte
+<script lang="ts">
+	import { formify, createForm } from '$lib/formifier/formifier.svelte.js';
+    let form = createForm({
+        fields: {
+            hobby: {},
+            hobbyCity: {},
+            hobbyClub: {}
+        }
+    })
+</script>
+
+<form use:formify={form}>
+    <input type="text" name="hobby" bind:value={form.fields.hobby.value} />
+
+        <input type="text" name="hobbyCity" 
+            bind:value={form.fields.hobbyCity.value} 
+            hidden={!form.fields.hobbyCity.isVisible} />
+        <input type="text" name="hobbyClub" 
+            bind:value={form.fields.hobbyClub.value} 
+            hidden={form.fields.hobbyCity.isHidden} />
+</form>
+```

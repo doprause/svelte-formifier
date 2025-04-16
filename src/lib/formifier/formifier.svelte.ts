@@ -1,17 +1,6 @@
 import { parse } from "svelte/compiler"
 import type { ZodSchema, ZodString } from "zod"
 
-// export type SafeParseSuccess<Output> = {
-// 	success: true;
-// 	data: Output;
-// 	error?: never;
-// };
-// export type SafeParseError<Input> = {
-// 	success: false;
-// 	error: ZodError<Input>;
-// 	data?: never;
-// };
-
 type ListenerFunction = (field: FormField) => void
 
 interface ValidationError {
@@ -32,6 +21,7 @@ type ValidationFormOption = {
 	onMount?: ValidatorFormOption
 	onSubmit?: ValidatorFormOption
 }
+type VisibilityFunction = (form: Form) => boolean
 
 interface FieldFormOption {
 	default?: string
@@ -43,6 +33,7 @@ interface FieldFormOption {
 	}
 	validator?: ValidatorFormOption
 	validation?: ValidationFormOption
+	visible?: VisibilityFunction
 }
 
 interface FieldsFormOption {
@@ -62,7 +53,9 @@ interface FormFields {
 interface FormField {
 	isChanged: boolean
 	isDirty: boolean
+	isHidden: boolean
 	isTouched: boolean
+	isVisible: boolean
 	name: string
 	error: string | null
 	errors: ValidationError[] | null
@@ -84,6 +77,9 @@ class Form {
 		return errors
 	})
 	readonly hasErrors = $derived(this.errors.length > 0)
+	// readonly isHidden = $derived.by(() => this.isHidden = !isVisible)
+	// readonly isVisible = $derived()
+	// TODO: We might have to implement a full fletched FormField class for this to work
 
 	constructor(options: FormOptions) {
 		this.options = options
@@ -111,7 +107,9 @@ class Form {
 		return {
 			isChanged: false,
 			isDirty: false,
+			isHidden: false,
 			isTouched: false,
+			isVisible: !this.isHidden,
 			error: null,
 			errors: null,
 			name: name,
