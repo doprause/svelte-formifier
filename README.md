@@ -226,7 +226,7 @@ let form = createForm({
 
 #### Validation Errors
 
-Validation errors are represented by `ValidationError` objects. A validation error object has a mandatory `name` and a `message` property.
+Validation errors are represented by `ValidationError` objects. A validation error object has a mandatory `name` and `message` property.
 
 ```ts
 interface ValidationError {
@@ -255,7 +255,7 @@ For convenience, there's also an `error` property, that holds a string with the 
 
 #### Form Validation
 
-There is an `errors` property which holds the current validation errors for the entire form, if any. If there are no validation errors, the property is `null`.
+There is an `errors` property which holds the current validation errors for the **entire form**, if any. If there are no validation errors, the property is `null`.
 
 To render the errors for the entire form, just use a snippet like this:
 
