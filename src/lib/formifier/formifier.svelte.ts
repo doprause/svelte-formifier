@@ -1,5 +1,5 @@
 import { parse } from "svelte/compiler"
-import type { ZodSchema, ZodString } from "zod"
+import type { ZodSchema, ZodString, ZodTypeAny } from "zod"
 
 type ListenerFunction = (field: FormField) => void
 
@@ -10,7 +10,7 @@ interface ValidationError {
 type ValidationResult = ValidationError[] | null
 type ValidationTriggers = 'onblur' | 'onchange' | 'onfocus' | 'oninput' | 'onmount'
 type ValidatorFunction = (field: FormField) => ValidationResult
-type ValidatorFormOption = ValidatorFunction | ZodString
+type ValidatorFormOption = ValidatorFunction | ZodTypeAny
 type ValidationFormOption = {
 	triggers?: ValidationTriggers[]
 	validator?: ValidatorFormOption
