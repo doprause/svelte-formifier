@@ -190,8 +190,8 @@ class Form {
 			this.validate(field)
 		}
 		else if(field.error && !options.validation?.triggers) {
-			// Validate on field input if there are not more specific 
-			// triggers and there are errors
+			// We want to validate on field input if there are errors and
+			// if there are not more specific triggers
 			this.validate(field) 
 		}
 
