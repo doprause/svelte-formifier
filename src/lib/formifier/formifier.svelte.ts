@@ -1,5 +1,4 @@
-import { parse } from "svelte/compiler"
-import type { ZodSchema, ZodString, ZodTypeAny } from "zod"
+import type { ZodSchema, ZodTypeAny } from "zod"
 
 type ListenerFunction = (field: FormField) => void
 
@@ -8,7 +7,7 @@ interface ValidationError {
 	message: string
 }
 type ValidationResult = ValidationError[] | null
-type ValidationTriggers = 'onblur' | 'onchange' | 'onfocus' | 'oninput' | 'onmount'
+type ValidationTriggers = 'auto' | 'onblur' | 'onchange' | 'onfocus' | 'oninput' | 'onmount'
 type ValidatorFunction = (field: FormField) => ValidationResult
 type ValidatorFormOption = ValidatorFunction | ZodTypeAny
 type ValidationFormOption = {
@@ -77,13 +76,13 @@ class Form {
 		return errors
 	})
 	readonly hasErrors = $derived(this.errors.length > 0)
-	// readonly isHidden = $derived.by(() => this.isHidden = !isVisible)
-	// readonly isVisible = $derived()
+
 	// TODO: We might have to implement a full fletched FormField class for this to work
 
 	constructor(options: FormOptions) {
 		this.options = options
 		this.fields = this.createFormFields(options)
+		this.updateVisibility()
 	}
 
 	createFormFields(options: FormOptions): FormFields {
@@ -109,13 +108,23 @@ class Form {
 			isDirty: false,
 			isHidden: false,
 			isTouched: false,
-			isVisible: !this.isHidden,
+			isVisible: true,
 			error: null,
 			errors: null,
 			name: name,
 			value: option.default ?? null
 		}
 	}
+
+	updateVisibility() {
+		Object.keys(this.fields).forEach((key: keyof typeof this.fields) => {
+			if (this.options.fields[key].visible) {
+				this.fields[key].isVisible = this.options.fields[key].visible(this)
+				this.fields[key].isHidden = ! this.fields[key].isVisible
+			}
+		})
+	}
+
 
 	handleBlurEvent(event: Event, field: FormField) {
 		const options = this.options.fields[field.name]
@@ -141,6 +150,12 @@ class Form {
 		else if (options.validation?.triggers?.includes('onchange')) {
 			this.validate(field)
 		}
+		else if (!options.validation?.triggers) {
+			// Validate on field changed if there are not more specific triggers
+			this.validate(field) 
+		}
+
+		this.updateVisibility()
 
 		options.listeners?.onChange?.(field)
 	}
@@ -171,9 +186,16 @@ class Form {
 		if (validator) {
 			this.validate(field, validator)
 		}
-		if (options.validation?.triggers?.includes('oninput')) {
+		else if (options.validation?.triggers?.includes('oninput')) {
 			this.validate(field)
 		}
+		else if(field.error && !options.validation?.triggers) {
+			// Validate on field input if there are not more specific 
+			// triggers and there are errors
+			this.validate(field) 
+		}
+
+		this.updateVisibility()
 
 		options.listeners?.onInput?.(field)
 	}
@@ -184,6 +206,8 @@ class Form {
 				this.fields[key] = this.createFormField(key as string, this.options.fields[key])
 			}
 		})
+
+		this.updateVisibility()
 	}
 
 	validate(field: FormField, validator?: ValidatorFormOption): ValidationResult {

@@ -40,7 +40,7 @@
 			},
 			hobbyClub: {},
 			hobbyCity: {
-				visible: () => false
+				visible: (form) => form.fields.hobby.value && form.fields.hobby.value.length > 3 ? true : false
 			},
 			password: {}
 		},
@@ -49,7 +49,6 @@
 	});
 
 	$inspect(form.fields);
-	$inspect(form.fields.hobbyCity.visible);
 </script>
 
 <h1>Svelte Formifier Example</h1>
@@ -97,7 +96,7 @@
 	{/if}
 	<div>
 		<label for="club">Hobby City</label>
-		<input type="text" name="hobbyClub" bind:value={form.fields.hobbyCity.value} hidden={form.fields.hobbyCity.visible}/>
+		<input type="text" name="hobbyClub" bind:value={form.fields.hobbyCity.value} hidden={form.fields.hobbyCity.isHidden}/>
 	</div>
 
 	<div>
