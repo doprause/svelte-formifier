@@ -1,28 +1,29 @@
 {
-  "name": "Svelte 5 Devcontainer",
-  "build": {
-    "dockerfile": "./Dockerfile",
-    "context": ".."
-  },
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-vscode-remote.remote-containers",
-        "vivaxy.vscode-conventional-commits",
-        "mhutchie.git-graph",
-        "svelte.svelte-vscode",
-        "aaron-bond.better-comments"
-      ],
-      "settings": {
-        "editor.formatOnSave": true
-      }
-    }
-  },
-  "postAttachCommand": {
-    // "owner": "sudo chown -R dev:dev /workspace"
-    "npm": "npm i"
-  },
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-  "workspaceFolder": "/workspace",
-  "remoteUser": "dev"
+	"name": "Svelte 5 Devcontainer",
+	"build": {
+		"dockerfile": "./Dockerfile",
+		"context": ".."
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode-remote.remote-containers",
+				"vivaxy.vscode-conventional-commits",
+				"mhutchie.git-graph",
+				"svelte.svelte-vscode",
+				"aaron-bond.better-comments",
+				"esbenp.prettier-vscode"
+			],
+			"settings": {
+				"editor.formatOnSave": true
+			}
+		}
+	},
+	"postAttachCommand": {
+		// "owner": "sudo chown -R dev:dev /workspace"
+		"npm": "npm i"
+	},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+	"workspaceFolder": "/workspace",
+	"remoteUser": "dev"
 }

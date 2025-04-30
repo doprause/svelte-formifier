@@ -10,19 +10,20 @@ Svelte Formifier provides headless and type-safe form state management for Svelt
 Currently there is no solution for Svelte 5 apps to handle forms straight forward on the client-side. This project is our take to provide such a solution.
 
 With Svelte Formifier, developers can tackle the following form-related challenges:
-- Reactive data binding 
+
+- Reactive data binding
 - Complex validation and error handling
 - Conditional visibility
 
 ## General Example
 
-Here's simple general example to see Svelte Formifier in action:
+Here's a simple general example to see Svelte Formifier in action:
 
 ```ts
 <script lang="ts">
 	import { formify, createForm } from '$lib/formifier/formifier.svelte.js';
 
-    // Create the form object that holds the reactive state and provides 
+    // Create the form object that holds the reactive state and provides
     // an API to interact with the form state
 	let form = createForm({
 		fields: {
@@ -52,7 +53,7 @@ Here's simple general example to see Svelte Formifier in action:
 
 ### Form Options
 
-``Form options`` are used to setup a `Form Instance`. The form options allow to configure individual form fields as well as the entire form.
+`Form options` are used to setup a `Form Instance`. The form options allow to configure individual form fields as well as the entire form.
 
 ### Form Instance
 
@@ -60,7 +61,7 @@ The form instance **holds the state** of the form and **provides an API** to int
 
 ### Form Fields
 
-Form fields represent the individual inputs of an HTML form. 
+Form fields represent the individual inputs of an HTML form.
 
 #### Field State
 
@@ -74,19 +75,19 @@ Each form field has the following reactive state elements:
 Typically, the `value` is bound to an HTML `<input>`'s value attribute:
 
 ```html
-<input name="fieldname" bind:value={ form.fields.fieldname.value }/>
+<input name="fieldname" bind:value="{" form.fields.fieldname.value } />
 ```
 
-Likewise the other state variables can be used to bind with other attributes. 
+Likewise the other state variables can be used to bind with other attributes.
 
 ### Validation
 
-Validation can be ``schema based`` or ``function based``. The schema based approach uses validation schemas from libraries like [Zod](https://zod.dev/) to validate each field. The function based approach uses a callback function that gets the form field's state as an argument and returns either **null**, if the validation passes, or an **array with the error objects**, if the validation fails.
+Validation can be `schema based` or `function based`. The schema based approach uses validation schemas from libraries like [Zod](https://zod.dev/) to validate each field. The function based approach uses a callback function that gets the form field's state as an argument and returns either **null**, if the validation passes, or an **array with the error objects**, if the validation fails.
 
-Validation can take place based on certain HTML input events called ``Validation Triggers``. I.e. validation can be triggered for the 
+Validation can take place based on certain HTML input events called `Validation Triggers`. I.e. validation can be triggered for the
 
-- `onBlur`, 
-- `onChange`, 
+- `onBlur`,
+- `onChange`,
 - `onFocus`,
 - `onInput`,
 - `onMount`,
@@ -201,6 +202,7 @@ let form = createForm({
     },
 });
 ```
+
 > [!NOTE]
 > Since all validations are run just before submitting the form by default, you don't have to set the `onsubmit` trigger explicitely.
 
@@ -233,8 +235,8 @@ Validation errors are represented by `ValidationError` objects. A validation err
 
 ```ts
 interface ValidationError {
-	name: string
-	message: string
+    name: string;
+    message: string;
 }
 ```
 
@@ -296,7 +298,7 @@ To render the errors for the entire form, just use a snippet like this:
 
 ### Conditional Visibility
 
-Svelte-formifier by default shows all fields of a form. However, sometimes it's required to show/hide certain fields dynamically based on the value of another field or a group of fields. You can either use plain Svelte 5 means to accomplish this or use `svelte-formifier`'s reactive `visible` property of a field. 
+Svelte-formifier by default shows all fields of a form. However, sometimes it's required to show/hide certain fields dynamically based on the value of another field or a group of fields. You can either use plain Svelte 5 means to accomplish this or use `svelte-formifier`'s reactive `visible` property of a field.
 
 The following example shows how to show/hide additional fields based on the value of another field with plain Svelte 5 template means. If the value of the `hobby` fields is not falsy, the input for the `club` field is shown, otherwise it's hidden.
 
@@ -321,28 +323,34 @@ The following example shows how to show/hide additional fields based on the valu
 </form>
 ```
 
-For more complex logic, `svelte-formifier` provides 
+For more complex logic, `svelte-formifier` provides
 
 ```svelte
 <script lang="ts">
-	import { formify, createForm } from '$lib/formifier/formifier.svelte.js';
+    import { formify, createForm } from '$lib/formifier/formifier.svelte.js';
     let form = createForm({
         fields: {
             hobby: {},
             hobbyCity: {},
             hobbyClub: {}
         }
-    })
+    });
 </script>
 
 <form use:formify={form}>
     <input type="text" name="hobby" bind:value={form.fields.hobby.value} />
 
-        <input type="text" name="hobbyCity" 
-            bind:value={form.fields.hobbyCity.value} 
-            hidden={!form.fields.hobbyCity.isVisible} />
-        <input type="text" name="hobbyClub" 
-            bind:value={form.fields.hobbyClub.value} 
-            hidden={form.fields.hobbyCity.isHidden} />
+    <input
+        type="text"
+        name="hobbyCity"
+        bind:value={form.fields.hobbyCity.value}
+        hidden={!form.fields.hobbyCity.isVisible}
+    />
+    <input
+        type="text"
+        name="hobbyClub"
+        bind:value={form.fields.hobbyClub.value}
+        hidden={form.fields.hobbyCity.isHidden}
+    />
 </form>
 ```
